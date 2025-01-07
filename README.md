@@ -1,4 +1,4 @@
-# RECIPE GENERATOR
+# RECIPE FINDER
 This website selects/generates recipes based on your nutrition goals and the ingredients you have at home! It was made with spoonacular API.
 
 ## Features
