@@ -1,0 +1,54 @@
+body {
+    font-family: "merriweather sans", serif;
+    margin: 0;
+    padding: 0;
+    background-color: #C1D8C3;
+    color: #efefd0;
+}
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #6A9C89;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+h1 {
+    text-align: center;
+    color: #FFF5E4;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+input, select, button {
+    padding: 10px;
+    font-size: 16px;
+    font-family: "merriweather sans", Serif;
+    color: #CD5C08;
+    background: #FFF5E4;
+    border: none;
+}
+.recipe-card {
+    border: 1px solid #F5EFE7;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    text-align: center;
+}
+.recipe-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+button {
+    background-color: #db7728;
+    color: #fff;
+}
+button:hover {
+    background-color: #CD5C08;
+}
+h3 {
+    text-align: center;
+    font-size: 16px;
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Finder</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Recipe Finder</h1>
+    <form id="recipe-form">
+        <input type="text" id="ingredients" placeholder="Enter ingredient (comma-separated)" required>
+        <select id="goal">
+            <option value="bulking">Bulking</option>
+            <option value="cutting">Cutting</option>
+        </select>
+        <div id="bulking-inputs" style="display: none">
+            <input type="number" id="minCalories" placeholder="Min Calories (for bulking)">
+            <input type="number" id="minProtein" placeholder="Min Protein (for bulking)">
+        </div>
+        <div id="cutting-inputs" style="display: none">
+        <input type="number" id="maxCalories" placeholder="Max Calories (for cutting)">
+        <input type="number" id="maxCarbs" placeholder="Max Carbs (for cutting)">
+        </div>
+        <button type="submit">Find Recipes</button>
+    </form>
+    <div id="recipe-container"></div>
+    <script>
+
+        // SHOW FORM INPUTS BOXES BASED IF YOU WANT TO BULK OR CUT
+        const goalSelect = document.getElementById("goal");
+        const bulkingInputs = document.getElementById("bulking-inputs");
+        const cuttingInputs = document.getElementById("cutting-inputs");
+
+        // function to show or hide inputs based on the selected goal
+        function toggleInputs() {
+            const goal = goalSelect.value;
+            if (goal === "bulking") {
+                bulkingInputs.style.display = "grid";
+                bulkingInputs.style.gap = "10px";
+                cuttingInputs.style.display = "none";
+            } else if (goal === "cutting") {
+                bulkingInputs.style.display = "none";
+                cuttingInputs.style.display = "grid";
+                cuttingInputs.style.gap = "10px";
+            }
+        }
+
+        // listen for changes in the goal selection
+        goalSelect.addEventListener("change", toggleInputs);
+
+        toggleInputs();
+
+
+        // ACTUAL RECIPE SEARCHING WOOOOOO
+        // THE STUFF THAT HELPS THIS WORK
+
+        const form = document.getElementById("recipe-form");
+        const resultsDiv = document.getElementById("recipe-container");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const ingredients = document.getElementById("ingredients").value.trim();
+            const goal = document.getElementById("goal").value;
+            const minCalories = document.getElementById("minCalories").value.trim();
+            const minProtein = document.getElementById("minProtein").value.trim();
+            const maxCalories = document.getElementById("maxCalories").value.trim();
+            const maxCarbs = document.getElementById("maxCarbs").value.trim();
+
+            let url = `http://127.0.0.1:8000/recipes/complexSearch?includeIngredients=${ingredients}`;
+
+            if (goal === "bulking") {
+                if (minCalories) url += `&minCalories=${encodeURIComponent(minCalories)}`;
+                if (minProtein) url += `&minProtein=${encodeURIComponent(minProtein)}`;
+            } else if (goal === "cutting") {
+                if (maxCalories) url += `&maxCalories=${encodeURIComponent(maxCalories)}`;
+                if (maxCarbs) url += `&maxCarbs=${encodeURIComponent(maxCarbs)}`;
+            }
+
+            url += `&number=5`;
+
+            try {
+                resultsDiv.innerHTML = "Loading recipes...";
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p>${data.error}</p>`;
+                    return;
+                }
+
+                const recipes = data.results || [];
+                resultsDiv.innerHTML = "";
+
+                recipes.forEach(recipe => {
+                    const div = document.createElement("div");
+                    div.classList.add("recipe-card");
+
+                    // Extract desired nutrients
+                    const nutrients = recipe.nutrition?.nutrients || [];
+                    const calories = nutrients.find(n => n.name === "Calories")?.amount ?? "N/A";
+                    const protein = nutrients.find(n => n.name === "Protein")?.amount ?? "N/A";
+                    const carbs = nutrients.find(n => n.name === "Carbohydrates")?.amount ?? "N/A";
+
+                    div.innerHTML = `
+                <h3>${recipe.title}</h3>
+                <img src="${recipe.image}" alt="${recipe.title}" style="width:100px;">
+                <p>Calories: ${calories} kcal</p>
+                <p>Protein: ${protein} g</p>
+                <p>Carbs: ${carbs} g</p>
+            `;
+                    resultsDiv.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error fetching recipes:", error);
+                resultsDiv.innerHTML = "<p>Failed to load recipes. Please try again.</p>";
+            }
+        });
+    </script>
+    <h3>Made by BeesFan/Tats Morales</h3>
+</div>
+</body>
+</html>
